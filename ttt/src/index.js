@@ -79,12 +79,13 @@ import './index.css';
         history: [{
           squares: Array(9).fill(null)
         }],
+        StepNumber: 0,
         xIsNext: true
       };
     }
   
     handleClick(i) {
-      const history = this.state.history;
+      const history = this.state.history.slice(0, this.state.StepNumber + 1);
       const current = history[history.length - 1];
       const squares = current.squares.slice();
       if (calculateWinner(squares) || squares[i]) {
@@ -95,16 +96,32 @@ import './index.css';
         history: history.concat([{
           squares: squares
         }]),
+        StepNumber: history.length,
         xIsNext: !this.state.xIsNext,
       });
     }
 
+    jumpTo(step){
+      this.setState({
+        StepNumber: step,
+        xIsNext: (step % 2) === 0
+      });
+    }
     render() {
       const history = this.state.history;
-      const current = history[history.length -1];
+      const current = history[this.state.StepNumber];
       const winner = calculateWinner(current.squares);
 
-      
+      const moves = history.map((step, move) => {
+        const desc = move ?
+        'Go to move #' + move :
+        'Go to game start';
+        return (
+          <li key={move}>
+            <button onClick={() => this.jumpTo(move)}>{desc}</button>
+          </li>
+        );
+      });
 
       let status;
 
@@ -123,8 +140,8 @@ import './index.css';
             />
           </div>
           <div className="game-info">
-            <div>{/* status */ status}</div>
-            <ol>{/* TODO */}</ol>
+            <div>{status}</div>
+            <ol>{moves}</ol>
           </div>
         </div>
       );
